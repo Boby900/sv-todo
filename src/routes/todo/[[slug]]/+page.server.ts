@@ -1,7 +1,22 @@
 import { db } from '$lib/server/db';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { todos } from '$lib/server/db/schema';
-
+// LOAD FUNCTION - runs before page loads, data goes to 'data' prop
+export const load: PageServerLoad = async () => {
+    try {
+        // Get all existing todos from database
+        const allTodos = await db.select().from(todos);
+        
+        return {
+            todos: allTodos
+        };
+    } catch (error) {
+        console.error("Failed to load todos:", error);
+        return {
+            todos: []
+        };
+    }
+};
 export const actions = {
     default: async ({ request }) => {
         console.log("Hello from server!")

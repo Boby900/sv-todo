@@ -1,10 +1,12 @@
 <script lang="ts">
     import { enhance } from '$app/forms';
-    import type { ActionData } from './$types';
+    import type { PageProps } from './$types';
     
-    export let form: ActionData;
+    // Use the new $props() rune instead of export let
+    let { data, form }: PageProps = $props();
     
-    let taskInput = '';
+    // Use $state() for reactive state instead of let
+    let taskInput = $state('');
   </script>
   
   <h1 class="text-center text-2xl font-bold p-2">Hello and welcome to my todo-sv!</h1>
@@ -12,6 +14,9 @@
   {#if form?.success}
     <div class="text-green-600 text-center p-2">
       Task "{form.todo?.task}" added successfully!
+      {data.todos[0].id}
+      {data.todos[0].task}
+      {data.todos[0].completed}
     </div>
   {:else if form?.error}
     <div class="text-red-600 text-center p-2">
@@ -22,7 +27,9 @@
   <div class="flex justify-center">
     <form method="post" use:enhance={() => {
       return async ({ result, update }) => {
-        taskInput = ''; // Clear input on successful submission
+        if (result.type === 'success') {
+          taskInput = ''; // Clear input on successful submission
+        }
         update();
       };
     }}>
