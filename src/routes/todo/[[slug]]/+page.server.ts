@@ -1,6 +1,7 @@
 import { db } from '$lib/server/db';
 import type { Actions, PageServerLoad } from './$types';
 import { todos } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 // LOAD FUNCTION - runs before page loads, data goes to 'data' prop
 export const load: PageServerLoad = async () => {
     try {
@@ -17,8 +18,8 @@ export const load: PageServerLoad = async () => {
         };
     }
 };
-export const actions = {
-    default: async ({ request }) => {
+export const actions = {    
+    createTodo: async ({ request }) => {
         console.log("Hello from server!")
         
         try {
@@ -53,6 +54,26 @@ export const actions = {
             return {
                 success: false,
                 error: "Failed to create todo"
+            };
+        }
+    },
+    markCompleted: async ({ request }) => {
+        console.log("Hello from server!")
+        const formData = await request.formData();
+        const id = formData.get('id') as string;
+        try {
+        await db.update(todos).set({
+            completed: true
+         }).where(eq(todos.id, Number(id)));   
+         
+         return {
+            success: true,
+         };
+        } catch (error) {
+            console.error("Database query error:", error);
+            return {
+                success: false,
+                error: "Failed to mark todo as completed"
             };
         }
     }
