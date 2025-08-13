@@ -57,23 +57,54 @@ export const actions = {
             };
         }
     },
-    markCompleted: async ({ request }) => {
-        console.log("Hello from server!")
+ markCompleted: async ({ request }) => {
         const formData = await request.formData();
+        console.log("Form data:", formData);
         const id = formData.get('id') as string;
+        console.log("Todo ID to mark completed:", id);
         try {
-        await db.update(todos).set({
-            completed: true
-         }).where(eq(todos.id, Number(id)));   
-         
-         return {
-            success: true,
-         };
+            // First, get the current todo to determine its current state
+            const currentTodo = await db.select().from(todos).where(eq(todos.id, Number(id)));
+            console.log("Current todo:", currentTodo);
+            if (currentTodo.length === 0) {
+                return {
+                    success: false,
+                    error: "Todo not found"
+                };
+            }
+
+            // Toggle the completed status
+            const newCompletedStatus = !currentTodo[0].completed;
+            
+            await db.update(todos).set({
+                completed: newCompletedStatus
+            }).where(eq(todos.id, Number(id)));   
+            
+            return {
+                success: true,
+            };
         } catch (error) {
             console.error("Database query error:", error);
             return {
                 success: false,
-                error: "Failed to mark todo as completed"
+                error: "Failed to toggle todo completion"
+            };
+        }
+    },
+    deleteTodo: async ({ request }) => {
+        console.log("Hello from server!")
+        const formData = await request.formData();
+        const id = formData.get('id') as string;
+        try {
+            await db.delete(todos).where(eq(todos.id, Number(id)));
+            return {
+                success: true,
+            };
+        } catch (error) {
+            console.error("Database query error:", error);
+            return {
+                success: false,
+                error: "Failed to delete todo"
             };
         }
     }
