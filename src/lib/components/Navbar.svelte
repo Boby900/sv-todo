@@ -1,51 +1,110 @@
-<script>
-    let isOpen = false;
+<script lang="ts">
+	import { authClient } from '$lib/auth-client';
+	import { onMount } from 'svelte';
 
-    const navigation = [
-      { name: 'Home', href: '#', current: true },
-      { name: 'About', href: '#', current: false },
-      { name: 'Login', href: '#', current: false },
-    ];
-  </script>
-  
-  <nav class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <!-- Logo -->
-        <div class="flex-shrink-0 flex items-center">
-          <div class="flex items-center space-x-2">
-            <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-sm">B</span>
-            </div>
-            <span class="text-xl font-bold text-gray-900">todo-sv</span>
-          </div>
-        </div>
-  
-        <!-- Desktop Navigation -->
-        <div class="hidden md:block">
-          <div class="ml-10 flex items-baseline space-x-1">
-            {#each navigation as item}
-              <div class="relative">
-                <a
-                  href={item.href}
-                  class="px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 {item.current
-                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}"
-                  >
-                    {item.name}
-                  </a>
-              </div>
-            {/each}
-          </div>
-        </div>
-  
-        <!-- CTA Button -->
-        <div class="hidden md:block">
-          <button class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
-            <a href="/todo/hello">Get Started</a>
-          </button>
-        </div>
+	let session = $state<Record<string, any> | null>(null);
+	let isLoading = $state(true);
 
-      </div>
-    </div>
-  </nav>
+	// Handle session loading asynchronously
+	onMount(async () => {
+		try {
+			const result = await authClient.getSession();
+			session = result;
+		} catch (err) {
+			console.error('Error getting session:', err);
+		} finally {
+			isLoading = false;
+		}
+	});
+	const navigation = [
+		{ name: 'Home', href: '#', current: true },
+		{ name: 'About', href: '#', current: false },
+		{ name: 'Login', href: '/signin', current: false }
+	];
+
+	async function handleSignOut() {
+		try {
+			await authClient.signOut();
+			// Immediately update the local state
+			session = { data: null, error: null };
+			console.log('Signed out - session cleared');
+
+			// Optionally reload session from server to be sure
+			// await loadSession();
+		} catch (err) {
+			console.error('Error signing out:', err);
+		}
+	}
+</script>
+
+<nav class="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-lg">
+	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+		<div class="flex h-16 items-center justify-between">
+			<!-- Logo -->
+			<div class="flex flex-shrink-0 items-center">
+				<div class="flex items-center space-x-2">
+					<div
+						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"
+					>
+						<span class="text-sm font-bold text-white">B</span>
+					</div>
+					<span class="text-xl font-bold text-gray-900">todo-sv</span>
+				</div>
+			</div>
+
+			<!-- Desktop Navigation -->
+			<div class="hidden md:block">
+				<div class="ml-10 flex items-baseline space-x-1">
+					{#each navigation as item}
+						{#if item.name !== 'Login'}
+							<div class="relative">
+								<a
+									href={item.href}
+									class="rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 {item.current
+										? 'border border-blue-200 bg-blue-50 text-blue-700'
+										: 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}"
+								>
+									{item.name}
+								</a>
+							</div>
+						{/if}
+					{/each}
+					<!-- Conditional rendering for Login/SignOut -->
+					{#if isLoading}
+						<!-- Show loading state -->
+						<div class="animate-pulse rounded-md bg-gray-200 px-3 py-2 text-sm">Loading...</div>
+					{:else if session?.data}
+						<!-- User is logged in - show SignOut -->
+						<div class="relative">
+							<button
+								onclick={handleSignOut}
+								class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:text-gray-900"
+							>
+								Sign Out
+							</button>
+						</div>
+					{:else}
+						<!-- User is NOT logged in - show Login -->
+						<div class="relative">
+							<a
+								href="/signin"
+								class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:text-gray-900"
+							>
+								Login
+							</a>
+						</div>
+					{/if}
+				</div>
+			</div>
+
+			<!-- CTA Button -->
+			<div class="hidden md:block">
+				<button
+					class="transform rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-2 text-sm font-medium text-white shadow-lg transition-all duration-200 hover:scale-105 hover:from-blue-600 hover:to-purple-700 hover:shadow-xl"
+				>
+					<a href="/todo/hello">Get Started</a>
+				</button>
+			</div>
+		</div>
+	</div>
+</nav>

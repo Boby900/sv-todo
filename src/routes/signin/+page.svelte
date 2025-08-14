@@ -1,37 +1,37 @@
 <script lang="ts">
-  import { authClient } from "$lib/auth-client";
-  import { goto } from "$app/navigation";
+	import { authClient } from '$lib/auth-client';
+	import { goto } from '$app/navigation';
 
-  let email = '';
-  let password = '';
-  let rememberMe = true;
-  let loading = false;
-  let error = '';
+	let email = '';
+	let password = '';
+	let rememberMe = true;
+	let loading = false;
+	let error = '';
 
-  async function handleSignin() {
-    loading = true;
-    error = '';
+	async function handleSignin() {
+		loading = true;
+		error = '';
 
-    await authClient.signIn.email({
-        email,
-        password,
-        rememberMe,
-      },
-     {
-        onError(context) {
-          error = context.error.message;
-          loading = false; // Stop loading on error
-          console.error('Signin error:', context.error.message);
-          loading = false; // Stop loading on error
-        },  
-        onSuccess() {
-          goto('/'); // redirect to protected page
-          loading = false; // Stop loading on success
-        },
-     }
-    );
-
-  }
+		await authClient.signIn.email(
+			{
+				email,
+				password,
+				rememberMe
+			},
+			{
+				onError(context) {
+					error = context.error.message;
+					loading = false; // Stop loading on error
+					console.error('Signin error:', context.error.message);
+					loading = false; // Stop loading on error
+				},
+				onSuccess() {
+					goto('/'); // redirect to protected page
+					loading = false; // Stop loading on success
+				}
+			}
+		);
+	}
 </script>
 
 <div class="mx-auto mt-8 max-w-md rounded-lg bg-white p-6 shadow-md">
