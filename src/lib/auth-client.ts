@@ -1,8 +1,6 @@
-// src/lib/auth-client.ts
 import { createAuthClient } from 'better-auth/svelte';
+import { env } from '$env/dynamic/public';
 
 export const authClient = createAuthClient({
-	baseURL: process.env.BETTER_AUTH_URL // Points to your own app
+	baseURL: env.PUBLIC_BETTER_AUTH_URL // Points to your own app
 });
-
-export const { signIn, signUp, useSession } = createAuthClient();

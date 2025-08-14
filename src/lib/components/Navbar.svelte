@@ -26,7 +26,7 @@
 		try {
 			await authClient.signOut();
 			// Immediately update the local state
-			session = { data: null, error: null };
+			session = null;
 			console.log('Signed out - session cleared');
 
 			// Optionally reload session from server to be sure
