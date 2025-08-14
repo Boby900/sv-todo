@@ -10,7 +10,6 @@
 		try {
 			const result = await authClient.getSession();
 			session = result;
-			
 		} catch (err) {
 			console.error('Error getting session:', err);
 		} finally {
@@ -23,13 +22,13 @@
 		{ name: 'Login', href: '/signin', current: false }
 	];
 
-  async function handleSignOut() {
+	async function handleSignOut() {
 		try {
 			await authClient.signOut();
 			// Immediately update the local state
 			session = { data: null, error: null };
 			console.log('Signed out - session cleared');
-			
+
 			// Optionally reload session from server to be sure
 			// await loadSession();
 		} catch (err) {
