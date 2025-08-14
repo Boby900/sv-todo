@@ -2,7 +2,7 @@
 import { createAuthClient } from 'better-auth/svelte';
 
 export const authClient = createAuthClient({
-	baseURL: 'http://localhost:5173' // Points to your own app
+	baseURL: process.env.BETTER_AUTH_URL // Points to your own app
 });
 
 export const { signIn, signUp, useSession } = createAuthClient();
