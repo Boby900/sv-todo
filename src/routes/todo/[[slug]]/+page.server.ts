@@ -2,8 +2,18 @@ import { db } from '$lib/server/db';
 import type { Actions, PageServerLoad } from './$types';
 import { todos } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { auth } from '$lib/auth';
+import { redirect } from '@sveltejs/kit';
 // LOAD FUNCTION - runs before page loads, data goes to 'data' prop
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ request }) => {
+	console.log('request', request);
+	const session = await auth.api.getSession({
+		headers: request.headers
+	});
+	console.log('session', session);
+	if (!session) {
+		throw redirect(302, '/signin');
+	}
 	try {
 		// Get all existing todos from database
 		const allTodos = await db.select().from(todos);

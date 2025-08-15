@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation';
-
+	import { sessionStore } from '$lib/stores/session';
 	let email = '';
 	let password = '';
 	let rememberMe = true;
@@ -25,8 +25,10 @@
 					console.error('Signin error:', context.error.message);
 					loading = false; // Stop loading on error
 				},
-				onSuccess() {
-					goto('/'); // redirect to protected page
+				async onSuccess() {
+					const s = await authClient.getSession();
+					sessionStore.set(s);
+					goto('/', { invalidateAll: true }); // redirect to protected page
 					loading = false; // Stop loading on success
 				}
 			}
