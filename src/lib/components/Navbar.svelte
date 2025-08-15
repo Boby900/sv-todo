@@ -1,21 +1,32 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
 	import { onMount } from 'svelte';
+	import { sessionStore } from '$lib/stores/session';
+	import { goto } from '$app/navigation';
+	
+	let session: Record<string, any> | null = null;
+	let isLoading = true;
 
-	let session = $state<Record<string, any> | null>(null);
-	let isLoading = $state(true);
+	sessionStore.subscribe((value) => {
+		session = value;
+	});
 
-	// Handle session loading asynchronously
-	onMount(async () => {
+	async function loadSession() {
+		isLoading = true;
 		try {
-			const result = await authClient.getSession();
-			session = result;
+			session = await authClient.getSession();
+			sessionStore.set(session);
 		} catch (err) {
 			console.error('Error getting session:', err);
 		} finally {
 			isLoading = false;
 		}
+	}
+
+	onMount(() => {
+		loadSession(); // ✅ runs once at start
 	});
+
 	const navigation = [
 		{ name: 'Home', href: '#', current: true },
 		{ name: 'About', href: '#', current: false },
@@ -25,12 +36,8 @@
 	async function handleSignOut() {
 		try {
 			await authClient.signOut();
-			// Immediately update the local state
-			session = null;
-			console.log('Signed out - session cleared');
-
-			// Optionally reload session from server to be sure
-			// await loadSession();
+			sessionStore.set(null);
+			goto('/', { invalidateAll: true });
 		} catch (err) {
 			console.error('Error signing out:', err);
 		}
@@ -87,6 +94,7 @@
 						<!-- User is NOT logged in - show Login -->
 						<div class="relative">
 							<a
+								onclick={() => setTimeout(loadSession, 500)}
 								href="/signin"
 								class="rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-all duration-200 hover:bg-gray-50 hover:text-gray-900"
 							>
