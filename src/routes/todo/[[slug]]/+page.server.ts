@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db';
 import type { Actions, PageServerLoad } from './$types';
 import { todos } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { auth } from '$lib/auth';
 import { redirect } from '@sveltejs/kit';
 // LOAD FUNCTION - runs before page loads, data goes to 'data' prop
@@ -15,22 +15,35 @@ export const load: PageServerLoad = async ({ request }) => {
 		throw redirect(302, '/signin');
 	}
 	try {
-		// Get all existing todos from database
-		const allTodos = await db.select().from(todos);
+		// Get only todos for the current user
+		const userTodos = await db
+			.select()
+			.from(todos)
+			.where(eq(todos.userId, session.user.id));
 
 		return {
-			todos: allTodos
+			todos: userTodos,
+			user: session.user
 		};
 	} catch (error) {
 		console.error('Failed to load todos:', error);
 		return {
-			todos: []
+			todos: [],
+			user: session.user
 		};
 	}
 };
+
 export const actions = {
 	createTodo: async ({ request }) => {
-		console.log('Hello from server!');
+		console.log('Creating todo for user');
+		const session = await auth.api.getSession({
+			headers: request.headers
+		});
+
+		if (!session) {
+			throw redirect(302, '/signin');
+		}
 
 		try {
 			// Get form data from the request
@@ -51,7 +64,8 @@ export const actions = {
 				.insert(todos)
 				.values({
 					task: taskText.trim(),
-					completed: false
+					completed: false,
+					userId: session.user.id
 				})
 				.returning();
 
@@ -70,6 +84,14 @@ export const actions = {
 		}
 	},
 	markCompleted: async ({ request }) => {
+		const session = await auth.api.getSession({
+			headers: request.headers
+		});
+
+		if (!session) {
+			throw redirect(302, '/signin');
+		}
+
 		const formData = await request.formData();
 		console.log('Form data:', formData);
 		const id = formData.get('id') as string;
@@ -79,7 +101,7 @@ export const actions = {
 			const currentTodo = await db
 				.select()
 				.from(todos)
-				.where(eq(todos.id, Number(id)));
+				.where(and(eq(todos.id, Number(id)), eq(todos.userId, session.user.id)));
 			console.log('Current todo:', currentTodo);
 			if (currentTodo.length === 0) {
 				return {
@@ -96,7 +118,10 @@ export const actions = {
 				.set({
 					completed: newCompletedStatus
 				})
-				.where(eq(todos.id, Number(id)));
+				.where(and(
+					eq(todos.id, Number(id)),
+					eq(todos.userId, session.user.id)  // Security check
+				));
 
 			return {
 				success: true
@@ -110,11 +135,18 @@ export const actions = {
 		}
 	},
 	deleteTodo: async ({ request }) => {
+		const session = await auth.api.getSession({
+			headers: request.headers
+		});
+
+		if (!session) {
+			throw redirect(302, '/signin');
+		}	
 		console.log('Hello from server!');
 		const formData = await request.formData();
 		const id = formData.get('id') as string;
 		try {
-			await db.delete(todos).where(eq(todos.id, Number(id)));
+			await db.delete(todos).where(and(eq(todos.id, Number(id)), eq(todos.userId, session.user.id)));
 			return {
 				success: true
 			};
