@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { authClient } from '$lib/auth-client';
 	import { goto } from '$app/navigation'; // Change this import
-
+	import { sessionStore } from '$lib/stores/session';
 	let name = '';
 	let email = '';
 	let password = '';
@@ -26,8 +26,10 @@
 					console.error('Signup error:', context.error.message);
 				},
 
-				onSuccess(context) {
+				async onSuccess(context) {
 					success = context.data.message;
+					const s = await authClient.getSession();
+					sessionStore.set(s);
 					loading = false; // Add this
 					console.log('Signup successful:', context.data.message);
 					goto('/'); // Use goto() instead of redirect()

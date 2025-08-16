@@ -59,5 +59,8 @@ export const verification = pgTable('verification', {
 export const todos = pgTable('todos', {
 	id: serial('id').primaryKey(),
 	task: text('task').notNull(),
-	completed: boolean('completed').notNull().default(false)
+	completed: boolean('completed').notNull().default(false),
+	userId: text('user_id')
+		.notNull()
+		.references(() => user.id, { onDelete: 'cascade' })
 });
