@@ -1,38 +1,74 @@
-# sv
+# sv-todo
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A simple, modern Todo application built with **SvelteKit**, **Drizzle ORM**, and **TypeScript**.
 
-## Creating a project
+---
 
-If you're seeing this, you've probably already done this step. Congrats!
+## 🚀 Features
 
-```sh
-# create a new project in the current directory
-npx sv create
+- **User authentication** (sign up, sign in)
+- **Create, edit, and delete** todo items
+- **Organize todos by slug** (custom URLs)
+- **Persistent storage** with Drizzle ORM and SQL
+- **Responsive, clean UI**
 
-# create a new project in my-app
-npx sv create my-app
+---
+
+## 🛠️ Tech Stack
+
+- [SvelteKit](https://kit.svelte.dev/) – Frontend framework
+- [TypeScript](https://www.typescriptlang.org/) – Type safety
+- [Drizzle ORM](https://orm.drizzle.team/) – Database ORM
+- [Vite](https://vitejs.dev/) – Build tool
+- [PNPM](https://pnpm.io/) – Package manager
+
+---
+
+## 🏁 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- [PNPM](https://pnpm.io/)
+
+### Installation
+
+```bash
+pnpm install
 ```
 
-## Developing
+### Database Setup
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Configure your database connection in `drizzle.config.ts`.
+2. Run migrations (if any) using Drizzle CLI.
 
-```sh
-npm run dev
+### Development
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```bash
+pnpm dev
 ```
 
-## Building
+Visit [http://localhost:5173](http://localhost:5173) to view the app.
 
-To create a production version of your app:
+### Build
 
-```sh
-npm run build
+```bash
+pnpm build
 ```
 
-You can preview the production build with `npm run preview`.
+---
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## 📁 Project Structure
+
+```text
+src/routes/   – SvelteKit routes (pages, API endpoints)
+src/lib/      – Shared libraries, components, stores, and database logic
+drizzle/      – Database migrations and metadata
+static/       – Static assets
+```
+
+---
+
+## 📄 License
+
+MIT
