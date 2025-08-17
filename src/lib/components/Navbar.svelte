@@ -28,7 +28,7 @@
 	});
 
 	const navigation = [
-		{ name: 'Home', href: '#', current: true },
+		{ name: 'Home', href: '/', current: true },
 		{ name: 'About', href: '#', current: false },
 		{ name: 'Login', href: '/signin', current: false }
 	];
@@ -50,12 +50,14 @@
 			<!-- Logo -->
 			<div class="flex flex-shrink-0 items-center">
 				<div class="flex items-center space-x-2">
+					<a href="/" class="flex items-center space-x-2">
 					<div
 						class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600"
 					>
 						<span class="text-sm font-bold text-white">B</span>
-					</div>
-					<span class="text-xl font-bold text-gray-900">todo-sv</span>
+						</div>
+						<span class="text-xl font-bold text-gray-900">todo-sv</span>
+					</a>
 				</div>
 			</div>
 
