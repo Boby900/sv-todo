@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Trash } from '@lucide/svelte';
+	import { Trash, LoaderCircle } from '@lucide/svelte';
 	import type { PageProps } from './$types';
-
 	// Use the new $props() rune instead of export let
 	let { data }: PageProps = $props();
+	let isLoading = $state(false);
 	function handleToggle(e: Event) {
 		e.preventDefault();
 		const input = e.target as HTMLInputElement | null;
@@ -24,11 +24,14 @@
 			method="post"
 			action="?/createTodo"
 			use:enhance={() => {
+				isLoading = true;
 				return async ({ result, update }) => {
+					isLoading = false;
 					if (result.type === 'success') {
 						taskInput = ''; // Clear input on successful submission
 					}
 					update();
+					isLoading = false;
 				};
 			}}
 		>
@@ -45,7 +48,11 @@
 				class="m-2 cursor-pointer rounded bg-blue-500 p-2 text-white hover:bg-blue-600"
 				type="submit"
 			>
-				Add Task
+				{#if isLoading}
+					<LoaderCircle class="animate-spin" />
+				{:else}
+					Add Task
+				{/if}
 			</button>
 		</form>
 	</div>
